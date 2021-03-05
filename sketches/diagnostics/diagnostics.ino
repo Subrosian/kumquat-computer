@@ -7,7 +7,7 @@ struct SWITCH
 {
   const byte pin;
   char label[20];
-  bool lastState;
+  bool state;
 };
 
 SWITCH switches[] =
@@ -29,28 +29,32 @@ void setup() {
 }
 
 void loop() {
+  checkSwitches();
+  delay(15);
+}
+
+void checkSwitches() {
   for (byte i = 0; i < NUMELEMENTS(switches); i++)
   {
-    if (!switches[i].lastState)
+    if (!switches[i].state)
     {
       if (digitalRead(switches[i].pin) == LOW)
       {
-        switches[i].lastState = true;
+        switches[i].state = true;
         Serial.print("INFO: ");
         Serial.print(switches[i].label);
-        Serial.print(" is Low");
+        Serial.println(" is On");
       }
     }
     else
     {
       if (digitalRead(switches[i].pin) == HIGH)
       {
-        switches[i].lastState = false;
+        switches[i].state = false;
         Serial.print("INFO: ");
         Serial.print(switches[i].label);
-        Serial.print(" is High");
+        Serial.println(" is Off");
       }
     }
   }
-  delay(15);
 }
