@@ -34,3 +34,4 @@ Teensy 4.1 Pinout
 36 = Button 2
 37 = Button 3
 38 = Button 4
+39 = Button 5
