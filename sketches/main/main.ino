@@ -1,8 +1,22 @@
 //calculate at compile time number of elements in an array
 #define NUMELEMENTS(x) sizeof(x)/sizeof(x[0])
 
-//Setting
+//Neopixel stuff
+#include <Adafruit_NeoPixel.h>
+#ifdef __AVR__
+#include <avr/power.h>
+#endif
+#define neopixelPin 2
+#define neopixelNum 32
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(neopixelNum, neopixelPin, NEO_GRB + NEO_KHZ800);
+
+//Setting variables
 const int onboardLedPin = 13;
+int mode = 0;
+int input1 = 0;
+int input2 = 0;
+int output = 0;
+String outputBin = 0;
 
 //Setting up the switches
 struct SWITCH
@@ -16,22 +30,22 @@ struct SWITCH
 
 SWITCH switches[] =
 {
-  {3, "Switch A0", 16, 0},
-  {4, "Switch A1", 17, 0},
-  {5, "Switch A2", 18, 0},
-  {6, "Switch A3", 19, 0},
-  {7, "Switch A4", 20, 0},
-  {8, "Switch A5", 21, 0},
-  {9, "Switch A6", 22, 0},
-  {10, "Switch A7", 23, 0},
-  {11, "Switch B0", 24, 0},
-  {12, "Switch B1", 25, 0},
-  {14, "Switch B2", 26, 0},
-  {15, "Switch B3", 27, 0},
-  {16, "Switch B4", 28, 0},
-  {17, "Switch B5", 29, 0},
-  {20, "Switch B6", 30, 0},
-  {21, "Switch B7", 31, 0},
+  {3, "Switch A0", 15, 0},
+  {4, "Switch A1", 14, 0},
+  {5, "Switch A2", 13, 0},
+  {6, "Switch A3", 12, 0},
+  {7, "Switch A4", 11, 0},
+  {8, "Switch A5", 10, 0},
+  {9, "Switch A6", 9, 0},
+  {10, "Switch A7", 8, 0},
+  {11, "Switch B0", 0, 0},
+  {12, "Switch B1", 1, 0},
+  {14, "Switch B2", 2, 0},
+  {15, "Switch B3", 3, 0},
+  {16, "Switch B4", 4, 0},
+  {17, "Switch B5", 5, 0},
+  {20, "Switch B6", 6, 0},
+  {21, "Switch B7", 7, 0},
   {22, "Switch C0", -1, 0},
   {23, "Switch C1", -1, 0},
   {28, "Switch C2", -1, 0},
@@ -70,18 +84,45 @@ struct LED
 
 LED leds[] =
 {
-  {0, "LED 0", 0},
-  {1, "LED 1", 0},
-  {2, "LED 2", 0},
-  {3, "LED 3", 0},
-  {4, "LED 4", 0},
-  {5, "LED 5", 0},
+  {0, "LED B0", 0},
+  {1, "LED B1", 0},
+  {2, "LED B2", 0},
+  {3, "LED B3", 0},
+  {4, "LED B4", 0},
+  {5, "LED B5", 0},
+  {6, "LED B6", 0},
+  {7, "LED B7", 0},
+  {8, "LED A7", 0},
+  {9, "LED A6", 0},
+  {10, "LED A5", 0},
+  {11, "LED A4", 0},
+  {12, "LED A3", 0},
+  {13, "LED A2", 0},
+  {14, "LED A1", 0},
+  {15, "LED A0", 0},
+  {16, "LED O0", 0},
+  {17, "LED O1", 0},
+  {18, "LED O2", 0},
+  {19, "LED O3", 0},
+  {20, "LED O4", 0},
+  {21, "LED O5", 0},
+  {22, "LED O6", 0},
+  {23, "LED O7", 0},
+  {24, "LED O8", 0},
+  {25, "LED O9", 0},
+  {26, "LED O10", 0},
+  {27, "LED O11", 0},
+  {28, "LED O12", 0},
+  {29, "LED O13", 0},
+  {30, "LED O14", 0},
+  {31, "LED O15", 0},
 };
 
 
 void setup() {
   Serial.begin(9600);
   pinMode(onboardLedPin, OUTPUT);
+  pixels.begin(); // This initializes the NeoPixel library.
 
   for (byte i = 0; i < NUMELEMENTS(switches); i++)
   {
@@ -96,12 +137,12 @@ void setup() {
 void loop() {
   checkSwitches();
   checkButtons();
-  delay(15);
-  if (switches[3].state == true) {
-    digitalWrite(onboardLedPin, HIGH);
-  } else {
-    digitalWrite(onboardLedPin, LOW);
+  checkMode();
+  updateLeds();
+  if (mode == 1) {
+    modeAdd();
   }
+  delay(15);
 }
 
 void checkSwitches() {
@@ -119,12 +160,6 @@ void checkSwitches() {
           Serial.print("Linked LED is " );
           Serial.print(switches[i].linkedLed);
           leds[switches[i].linkedLed].state = 1;
-        }
-        Serial.println("");
-        for (byte j = 0; j < NUMELEMENTS(leds); j++)
-        {
-          Serial.print(leds[j].state);
-          Serial.print(",");
         }
         Serial.println("");
       }
@@ -171,5 +206,77 @@ void checkButtons() {
         Serial.println(" is Off");
       }
     }
+  }
+}
+
+void checkMode() {
+  if (switches[16].state == 1) {
+    mode = 1;
+  }
+}
+
+void updateLeds() {
+  for (byte i = 0; i < NUMELEMENTS(leds); i++)
+  {
+    if (leds[i].state == 1) {
+      pixels.setPixelColor(i, pixels.Color(0, 20, 0)); // Moderately bright red color.
+    } else {
+      pixels.setPixelColor(i, pixels.Color(0, 0, 0)); // black
+    }
+  }
+  pixels.show(); // This sends the updated pixel color to the hardware.
+}
+
+void modeAdd() {
+  Serial.println("---");
+  convertInput1ToDec();
+  convertInput2ToDec();
+  output = input1 + input2;
+  Serial.print("Output:");
+  Serial.println(output);
+  convertOutputToBin();
+  Serial.print("OutputBin:");
+  Serial.println(outputBin);
+  clearLedOutputState();
+  sendOutputToLeds();
+}
+
+void convertInput1ToDec() {
+  input1 = (switches[0].state * pow(2, 0)) + (switches[1].state * pow(2, 1)) + (switches[2].state * pow(2, 2)) + (switches[3].state * pow(2, 3)) + (switches[4].state * pow(2, 4)) + (switches[5].state * pow(2, 5)) + (switches[6].state * pow(2, 6)) + (switches[7].state * pow(2, 7));
+}
+
+void convertInput2ToDec() {
+  input2 = (switches[8].state * pow(2, 0)) + (switches[9].state * pow(2, 1)) + (switches[10].state * pow(2, 2)) + (switches[11].state * pow(2, 3)) + (switches[12].state * pow(2, 4)) + (switches[13].state * pow(2, 5)) + (switches[14].state * pow(2, 6)) + (switches[15].state * pow(2, 7));
+}
+
+void convertOutputToBin() {
+  outputBin = String(output, BIN);
+}
+
+void sendOutputToLeds() {
+  Serial.print("Length:");
+  Serial.println(outputBin.length());
+  //for (int i = 0; i <= outputBin.length(); i++)
+  for (int i = outputBin.length() - 1, j = 0, k = 16; i >= 0; i--, j++, k++)
+  {
+
+    Serial.print("Character ");
+    Serial.print(j);
+    Serial.print(" LED ");
+    Serial.print(k);
+    Serial.print("=");
+    Serial.println(outputBin.charAt(i));
+    if (outputBin.charAt(i) == '1') {
+      leds[k].state = 1;
+    } else {
+      leds[k].state = 0;
+    }
+  }
+}
+
+void clearLedOutputState() {
+  for (byte i = 16; i < NUMELEMENTS(leds); i++)
+  {
+    leds[i].state = 0;
   }
 }
