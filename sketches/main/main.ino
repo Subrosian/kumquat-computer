@@ -56,6 +56,10 @@ SWITCH switches[] =
   {33, "Switch C7", -1, 0},
 };
 
+byte switchesBankA[] = {0, 1, 2, 3, 4, 5, 6, 7};
+byte switchesBankB[] = {8, 9, 10 , 11, 12, 13, 14, 15};
+byte switchesBankC[] = {16, 17, 18, 19, 20, 21, 22, 23};
+
 //Setting up the buttons
 struct BUTTON
 {
@@ -73,6 +77,7 @@ BUTTON buttons[] =
   {38, "Button 4", 0},
   {39, "Button 5", 0},
 };
+byte buttonsBankA[] = {0, 1, 2, 3, 4, 5};
 
 //Setting up LEDs
 struct LED
@@ -118,6 +123,9 @@ LED leds[] =
   {31, "LED O15", 0},
 };
 
+byte ledsBankA[] = {15, 14, 13, 12, 11, 10, 9, 8};
+byte ledsBankB[] = {0, 1, 2, 3, 4, 5, 6, 7};
+byte ledsBankC[] = {16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
 
 void setup() {
   Serial.begin(9600);
@@ -210,7 +218,8 @@ void checkButtons() {
 }
 
 void checkMode() {
-  if (switches[16].state == 1) {
+//  if (switches[16].state == 1) {
+    if (switches[16].state == 1) {
     mode = 1;
   }
 }
